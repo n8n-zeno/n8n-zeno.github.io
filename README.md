@@ -1,73 +1,90 @@
-# React + TypeScript + Vite
+# ZENO: Figma to Code Compiler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ZENO is a blazing-fast, deterministic compiler engine that instantly transforms your Figma designs into production-ready React components and HTML markup. It bridges the gap between design and development by turning Figma URLs directly into usable code.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Instant Compilation**: Paste your Figma node URL or file link and get code in seconds.
+- **Multiple Output Formats**: Export clean, structured React (`.tsx`) code or raw HTML.
+- **Syntax Highlighting**: Beautiful, VS Code-inspired code preview directly in the browser.
+- **Secure Authentication**: Built-in user authentication (Sign up / Sign in) to protect access.
+- **Figma Token Management**: Securely stores your Figma Personal Access Token (PAT) so you don't have to enter it every time.
+- **Smart Token Validation**: Automatically checks token expiration and prompts for updates if your Figma PAT is revoked or expires.
+- **n8n Webhook Integration**: Designed to securely proxy requests from the backend to an n8n automation webhook for deterministic code compilation.
 
-## React Compiler
+## 🛠️ Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+ZENO is structured as a modern monorepo containing a React frontend and a Node.js backend.
 
-## Expanding the ESLint configuration
+### Frontend
+- **Framework**: React 19 with Vite
+- **Routing**: React Router DOM (`/`, `/login`, `/signup`)
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Code Highlighting**: `react-syntax-highlighter` (VS Code Dark+ Theme)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Backend
+- **Runtime**: Node.js & Express
+- **Database**: SQLite (via Prisma ORM)
+- **Authentication**: JWT (JSON Web Tokens) & bcrypt password hashing
+- **Integration**: Securely proxies the user's Figma Token and URL to an n8n workflow.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📦 Local Development Setup
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+To run ZENO locally, you need to start both the frontend and backend servers.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+- An active [Figma Personal Access Token (PAT)](https://www.figma.com/settings) (Requires "File content" read access).
+- An n8n instance running locally or on a server to handle the webhook processing.
+
+### 1. Install Dependencies
+From the root of the project, run:
+```bash
+npm run install:all
+```
+*(This installs dependencies for both the `/frontend` and `/backend` directories).*
+
+### 2. Configure the Backend
+Navigate to the `backend` directory:
+```bash
+cd backend
+```
+Create a `.env` file (if it doesn't exist) and ensure it has the following variables:
+```env
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="super_secret_key_change_me_in_production"
+PORT=3001
+N8N_WEBHOOK_URL="http://localhost:5678/webhook/compile-figma"
+```
+Generate the Prisma Client and push the schema to the SQLite database:
+```bash
+npx prisma generate
+npx prisma db push
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 3. Start the Application
+You can start both servers using the root `package.json` scripts.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Open a terminal and start the backend:
+```bash
+npm run dev:backend
 ```
+
+Open a second terminal and start the frontend:
+```bash
+npm run dev:frontend
+```
+
+The frontend will be available at `http://localhost:5173`.
+
+## 💡 How to Use
+1. Create an account on the sign-up page and optionally enter your Figma PAT.
+2. Navigate to the main ZENO compiler interface.
+3. Paste a link to a specific Figma frame or component.
+4. Select your desired output format (React Code or HTML).
+5. Click "Compile" and watch your design turn into code!
+
+## 🔐 Security Note
+ZENO's backend acts as a secure proxy. The frontend never communicates directly with n8n, ensuring that your sensitive Figma tokens remain safely stored in the backend database and are only injected server-side during the compilation request.
