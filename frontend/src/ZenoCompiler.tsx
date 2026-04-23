@@ -198,13 +198,13 @@ export default function ZenoCompiler() {
         <div className="text-center mb-16 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111] border border-[#222] text-[#888] text-[11px] font-medium mb-6">
             <span className="w-2 h-2 rounded-full bg-green-500"></span>
-            v2.0 is now live
+            Zeno Engine v2.0 Online
           </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-[#888]">
             Figma to Code, <br/>Instantly.
           </h1>
           <p className="text-[#888] text-lg max-w-lg mx-auto">
-            The world's fastest compiler engine for turning Figma designs into production-ready React components.
+          Generate pixel-perfect frontends instantly HTML or React. No AI guesswork, no hallucinations—just exact UI replication.
           </p>
         </div>
 
