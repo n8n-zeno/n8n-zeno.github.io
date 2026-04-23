@@ -1,11 +1,12 @@
 {
-  "name": "Zeno website - Dynamic Token Fix",
+  "name": "Zeno website - Async Polling Engine",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "compile-figma",
-        "responseMode": "lastNode",
+        "responseMode": "onReceived",
+        "responseCode": 202,
         "options": {}
       },
       "id": "1bb6f272-88c7-4bba-a5bc-510e9396cdbc",
@@ -20,7 +21,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.first().json.body;\n\n// Safely extract regardless of payload structure\nconst figmaUrl = body.figmaUrl || body.url;\nconst format = body.format || body.outputFormat || 'react';\nconst figmaToken = body.figmaToken;\n\nif (!figmaUrl) {\n    throw new Error(\"Missing Figma URL in request payload.\");\n}\nif (!figmaToken) {\n    throw new Error(\"Missing Figma Token in request payload. Check your Node backend forwarding.\");\n}\n\n// --- Parse the URL ---\nconst fileIdMatch = figmaUrl.match(/\\/(?:file|design)\\/([a-zA-Z0-9]+)/);\nconst fileId = fileIdMatch ? fileIdMatch[1] : null;\n\nconst nodeIdMatch = figmaUrl.match(/node-id=([a-zA-Z0-9\\-%]+)/);\nlet nodeId = nodeIdMatch ? nodeIdMatch[1] : null;\n\nif (nodeId) {\n    nodeId = decodeURIComponent(nodeId).replace(/-/g, ':');\n}\n\nif (!fileId || !nodeId) {\n    throw new Error(\"Could not extract File ID or Node ID from URL.\");\n}\n\nreturn [{ json: { figmaUrl, fileId, nodeId, format, figmaToken } }];"
+        "jsCode": "const body = $input.first().json.body;\n\n// Safely extract regardless of payload structure\nconst figmaUrl = body.figmaUrl || body.url;\nconst format = body.format || body.outputFormat || 'react';\nconst figmaToken = body.figmaToken;\nconst jobId = body.jobId;\n\nif (!figmaUrl) {\n    throw new Error(\"Missing Figma URL in request payload.\");\n}\nif (!figmaToken) {\n    throw new Error(\"Missing Figma Token in request payload. Check your Node backend forwarding.\");\n}\nif (!jobId) {\n    throw new Error(\"Missing jobId in request payload. Your backend must send a jobId.\");\n}\n\n// --- Parse the URL ---\nconst fileIdMatch = figmaUrl.match(/\\/(?:file|design)\\/([a-zA-Z0-9]+)/);\nconst fileId = fileIdMatch ? fileIdMatch[1] : null;\n\nconst nodeIdMatch = figmaUrl.match(/node-id=([a-zA-Z0-9\\-%]+)/);\nlet nodeId = nodeIdMatch ? nodeIdMatch[1] : null;\n\nif (nodeId) {\n    nodeId = decodeURIComponent(nodeId).replace(/-/g, ':');\n}\n\nif (!fileId || !nodeId) {\n    throw new Error(\"Could not extract File ID or Node ID from URL.\");\n}\n\nreturn [{ json: { figmaUrl, fileId, nodeId, format, figmaToken, jobId } }];"
       },
       "id": "9aef6b08-fdc4-4485-9148-1e5ad5330649",
       "name": "Input & Parse Figma URL",
@@ -135,6 +136,24 @@
         -2352,
         688
       ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/api/webhook/n8n-result",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jobId: $('Input & Parse Figma URL').first().json.jobId, status: 'completed', data: $json.rawCode }) }}",
+        "options": {}
+      },
+      "id": "e43b1745-f092-4809-90b1-38e9c4b267ad",
+      "name": "Send Result to Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -2000,
+        544
+      ]
     }
   ],
   "pinData": {},
@@ -206,6 +225,28 @@
         [
           {
             "node": "Deterministic Compiler Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "React JSX Compiler Engine": {
+      "main": [
+        [
+          {
+            "node": "Send Result to Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deterministic Compiler Engine": {
+      "main": [
+        [
+          {
+            "node": "Send Result to Backend",
             "type": "main",
             "index": 0
           }

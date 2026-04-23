@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Terminal, Copy, Check, ArrowRight, Loader2, Sparkles, LogOut, Key } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
@@ -21,6 +21,14 @@ export default function ZenoCompiler() {
   // State for updating Figma token when missing or expired
   const [showTokenInput, setShowTokenInput] = useState(user ? !user.figmaToken : false);
   const [newToken, setNewToken] = useState('');
+
+  // Cleanup timers on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if ((window as any)._zeno_poll) clearInterval((window as any)._zeno_poll);
+      if ((window as any)._zeno_msg) clearInterval((window as any)._zeno_msg);
+    };
+  }, []);
 
   const handleUpdateToken = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -63,10 +71,13 @@ export default function ZenoCompiler() {
       'Finalizing Output...'
     ];
     let msgIndex = 0;
+    
+    if ((window as any)._zeno_msg) clearInterval((window as any)._zeno_msg);
     const msgInterval = setInterval(() => {
       setLoadingMessage(messages[msgIndex % messages.length]);
       msgIndex++;
     }, 3000);
+    (window as any)._zeno_msg = msgInterval;
 
     try {
       const response = await axios.post('http://localhost:3001/api/compile', {
@@ -79,6 +90,7 @@ export default function ZenoCompiler() {
       const { jobId } = response.data;
       
       // Start Polling
+      if ((window as any)._zeno_poll) clearInterval((window as any)._zeno_poll);
       const pollInterval = setInterval(async () => {
         try {
           const statusRes = await axios.get(`http://localhost:3001/api/compile/status/${jobId}`, {
@@ -95,44 +107,22 @@ export default function ZenoCompiler() {
             const data = result;
             let finalCode = '';
             
-            const deepSearchKey = (obj: any, targetKey: string): any => {
-              if (typeof obj !== 'object' || obj === null) return undefined;
-              if (targetKey in obj) return obj[targetKey];
-              const lowerTarget = targetKey.toLowerCase();
-              for (const key of Object.keys(obj)) {
-                if (key.toLowerCase().includes(lowerTarget)) return obj[key];
-              }
-              for (const key of Object.keys(obj)) {
-                const result = deepSearchKey(obj[key], targetKey);
-                if (result !== undefined) return result;
-              }
-              return undefined;
-            };
-
-            if (outputFormat === 'html') {
-              const htmlNodeOutput = deepSearchKey(data, 'html') || deepSearchKey(data, 'Deterministic Compiler Engine');
-              if (htmlNodeOutput && typeof htmlNodeOutput !== 'string' && (htmlNodeOutput.rawCode || htmlNodeOutput.text || htmlNodeOutput.code)) {
-                finalCode = htmlNodeOutput.rawCode || htmlNodeOutput.text || htmlNodeOutput.code;
-              } else if (typeof htmlNodeOutput === 'string') {
-                finalCode = htmlNodeOutput;
-              } else if (data.rawCode || data.text || data.code) {
-                finalCode = data.rawCode || data.text || data.code;
-              }
-            } else {
-              const reactNodeOutput = deepSearchKey(data, 'react');
-              if (reactNodeOutput && typeof reactNodeOutput !== 'string' && (reactNodeOutput.rawCode || reactNodeOutput.text || reactNodeOutput.code)) {
-                finalCode = reactNodeOutput.rawCode || reactNodeOutput.text || reactNodeOutput.code;
-              } else if (typeof reactNodeOutput === 'string') {
-                finalCode = reactNodeOutput;
-              } else if (data.rawCode || data.code || data.text || data.reactCode) {
-                finalCode = data.rawCode || data.code || data.text || data.reactCode;
-              }
+            // --- NEW, BULLETPROOF EXTRACTION LOGIC ---
+            // Handles cases where backend saved the string directly, or saved the full n8n payload
+            if (typeof data === 'string') {
+              finalCode = data;
+            } else if (data && typeof data.data === 'string') {
+              finalCode = data.data; // This matches the new n8n webhook payload!
+            } else if (data && typeof data === 'object') {
+              // Deep fallback just in case
+              finalCode = data.rawCode || data.code || data.text || data.reactCode || '';
             }
 
             if (finalCode) {
-              setOutputCode(typeof finalCode === 'string' ? finalCode : JSON.stringify(finalCode, null, 2));
+              setOutputCode(finalCode);
             } else {
-              setError('Invalid response structure from compiler.');
+              setError('Invalid response structure from compiler. Could not locate the code string.');
+              console.error("Payload received:", data);
             }
           } else if (status === 'failed') {
             clearInterval(pollInterval);
@@ -144,10 +134,8 @@ export default function ZenoCompiler() {
           console.error("Polling error:", err);
         }
       }, 2000);
-
-      // Cleanup on unmount (approximate)
+      
       (window as any)._zeno_poll = pollInterval;
-      (window as any)._zeno_msg = msgInterval;
 
     } catch (err: any) {
       clearInterval(msgInterval);
