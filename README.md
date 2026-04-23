@@ -88,3 +88,9 @@ The frontend will be available at `http://localhost:5173`.
 
 ## 🔐 Security Note
 ZENO's backend acts as a secure proxy. The frontend never communicates directly with n8n, ensuring that your sensitive Figma tokens remain safely stored in the backend database and are only injected server-side during the compilation request.
+
+
+Start server
+1.cd backend && npx ts-node src/index.ts
+2.cd frontend && npm run dev
+3.Npx n8n
