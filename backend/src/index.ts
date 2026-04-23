@@ -11,10 +11,8 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
-// Increase the JSON payload limit to 50mb (or whatever size fits your needs)
-app.use(express.json({ limit: '50mb' })); 
-
-// It's also a good idea to increase the limit for URL-encoded data
+// Increase the JSON payload limit to 50mb to prevent n8n webhook rejection
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use('/api/auth', authRoutes);

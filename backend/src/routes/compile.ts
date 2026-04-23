@@ -19,7 +19,6 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
       return;
     }
 
-    // Pre-flight check to verify token is still valid
     const preflight = await fetch('https://api.figma.com/v1/me', {
       headers: { 'X-Figma-Token': user.figmaToken },
     });
@@ -32,7 +31,6 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
       }
     }
 
-    // Create a new compile job
     const job = await prisma.compileJob.create({
       data: {
         userId: user.id,
@@ -40,7 +38,6 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
       }
     });
 
-    // Fire and forget to n8n webhook
     const n8nUrl = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/compile-figma';
     fetch(n8nUrl, {
       method: 'POST',
@@ -48,7 +45,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        jobId: job.id, // Inject Job ID here
+        jobId: job.id,
         figmaUrl: url,
         figmaToken: user.figmaToken,
         outputFormat: outputFormat,
@@ -58,7 +55,6 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
       }),
     }).catch(error => console.error("Error triggering n8n webhook:", error));
 
-    // Return the job ID to the client immediately
     res.status(202).json({ jobId: job.id, status: 'pending' });
 
   } catch (error) {
@@ -80,16 +76,17 @@ router.get('/status/:jobId', authenticate, async (req: AuthRequest, res: Respons
       return;
     }
 
-    // Optional: Ensure the user requesting the status owns the job
     if (job.userId !== req.userId) {
       res.status(403).json({ error: 'Forbidden' });
       return;
     }
 
+    // 🚀 NEW FIX: Let express safely encode the massive string.
+    // This avoids the JSON.parse memory crash but prevents invalid JSON formats.
     res.json({
       status: job.status,
-      result: job.result ? JSON.parse(job.result) : null,
-      error: job.error
+      error: job.error,
+      result: job.result
     });
 
   } catch (error) {

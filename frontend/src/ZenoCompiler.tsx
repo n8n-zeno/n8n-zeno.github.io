@@ -18,15 +18,14 @@ export default function ZenoCompiler() {
   
   const navigate = useNavigate();
 
-  // State for updating Figma token when missing or expired
   const [showTokenInput, setShowTokenInput] = useState(user ? !user.figmaToken : false);
   const [newToken, setNewToken] = useState('');
 
-  // Cleanup timers on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
       if ((window as any)._zeno_poll) clearInterval((window as any)._zeno_poll);
       if ((window as any)._zeno_msg) clearInterval((window as any)._zeno_msg);
+      (window as any)._zeno_fetching = false;
     };
   }, []);
 
@@ -63,13 +62,7 @@ export default function ZenoCompiler() {
     setOutputCode('');
     setLoadingMessage('Connecting to Figma...');
 
-    const messages = [
-      'Extracting Nodes...',
-      'Compiling JSX...',
-      'Optimizing Layout...',
-      'Generating Components...',
-      'Finalizing Output...'
-    ];
+    const messages = ['Extracting Nodes...', 'Compiling JSX...', 'Optimizing Layout...', 'Generating Components...', 'Finalizing Output...'];
     let msgIndex = 0;
     
     if ((window as any)._zeno_msg) clearInterval((window as any)._zeno_msg);
@@ -88,10 +81,13 @@ export default function ZenoCompiler() {
       });
 
       const { jobId } = response.data;
-      
-      // Start Polling
+      (window as any)._zeno_fetching = false;
+
       if ((window as any)._zeno_poll) clearInterval((window as any)._zeno_poll);
       const pollInterval = setInterval(async () => {
+        if ((window as any)._zeno_fetching) return; 
+        (window as any)._zeno_fetching = true;
+
         try {
           const statusRes = await axios.get(`http://localhost:3001/api/compile/status/${jobId}`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -104,25 +100,31 @@ export default function ZenoCompiler() {
             clearInterval(msgInterval);
             setIsLoading(false);
             
-            const data = result;
             let finalCode = '';
             
-            // --- NEW, BULLETPROOF EXTRACTION LOGIC ---
-            // Handles cases where backend saved the string directly, or saved the full n8n payload
-            if (typeof data === 'string') {
-              finalCode = data;
-            } else if (data && typeof data.data === 'string') {
-              finalCode = data.data; // This matches the new n8n webhook payload!
-            } else if (data && typeof data === 'object') {
-              // Deep fallback just in case
-              finalCode = data.rawCode || data.code || data.text || data.reactCode || '';
+            if (typeof result === 'string') {
+              if (result.trim().startsWith('{') || result.trim().startsWith('[')) {
+                try {
+                  const parsed = JSON.parse(result);
+                  finalCode = parsed.data || parsed.rawCode || parsed.code || result;
+                } catch(e) {
+                  finalCode = result;
+                }
+              } else {
+                finalCode = result;
+              }
+            } else if (result && typeof result === 'object') {
+              finalCode = result.data || result.rawCode || result.code || result.text || result.reactCode || '';
+            }
+
+            if (typeof finalCode === 'string' && finalCode.startsWith('"') && finalCode.endsWith('"')) {
+              try { finalCode = JSON.parse(finalCode); } catch(e) {}
             }
 
             if (finalCode) {
               setOutputCode(finalCode);
             } else {
-              setError('Invalid response structure from compiler. Could not locate the code string.');
-              console.error("Payload received:", data);
+              setError('Invalid response structure from compiler.');
             }
           } else if (status === 'failed') {
             clearInterval(pollInterval);
@@ -132,6 +134,8 @@ export default function ZenoCompiler() {
           }
         } catch (err) {
           console.error("Polling error:", err);
+        } finally {
+          (window as any)._zeno_fetching = false; 
         }
       }, 2000);
       
@@ -154,6 +158,11 @@ export default function ZenoCompiler() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const MAX_DISPLAY_LENGTH = 15000;
+  const displayCode = outputCode.length > MAX_DISPLAY_LENGTH 
+    ? outputCode.slice(0, MAX_DISPLAY_LENGTH) + '\n\n// ... \n// [Click "Copy Code" to copy the ENTIRE file!] \n// ...'
+    : outputCode;
 
   return (
     <div className="min-h-screen bg-[#000] text-[#EAEAEA] selection:bg-[#333] selection:text-white font-sans overflow-x-hidden">
@@ -271,7 +280,7 @@ export default function ZenoCompiler() {
                         {isLoading ? (
                           <>
                             <Loader2 size={16} className="animate-spin" />
-                            <span className="animate-pulse">{loadingMessage}</span>
+                            <span className="animate-pulse">{loadingMessage.split(' ')[0]}</span>
                           </>
                         ) : (
                           <>
@@ -330,7 +339,7 @@ export default function ZenoCompiler() {
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#111] border border-[#222] text-[11px] font-bold text-[#888] hover:text-white hover:border-[#444] transition-all"
                     >
                       {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-                      {copied ? 'Copied' : 'Copy Code'}
+                      {copied ? 'Copied Full File!' : 'Copy Full Code'}
                     </button>
                   </div>
                   
@@ -349,7 +358,7 @@ export default function ZenoCompiler() {
                         }}
                         wrapLines={true}
                       >
-                        {outputCode}
+                        {displayCode}
                       </SyntaxHighlighter>
                     </div>
                   </div>

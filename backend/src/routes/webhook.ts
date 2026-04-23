@@ -19,12 +19,18 @@ router.post('/n8n-result', async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
+    // 🚀 NEW FIX: Check if data is already a string to prevent double-stringify bloating
+    let formattedResult = null;
+    if (data !== undefined && data !== null) {
+       formattedResult = typeof data === 'string' ? data : JSON.stringify(data);
+    }
+
     await prisma.compileJob.update({
       where: { id: jobId },
       data: {
         status: status,
-        result: data ? JSON.stringify(data) : null,
-        error: error || null,
+        result: formattedResult,
+        error: typeof error === 'string' ? error : (error ? JSON.stringify(error) : null),
       }
     });
 
