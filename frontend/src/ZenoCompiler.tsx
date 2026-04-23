@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Terminal, Copy, Check, ArrowRight, Loader2, Sparkles, Cpu, LogOut, Key } from 'lucide-react';
+import { Terminal, Copy, Check, ArrowRight, Loader2, Sparkles, LogOut, Key } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import axios from 'axios';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -137,8 +137,8 @@ export default function ZenoCompiler() {
 
       <nav className="relative z-10 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <Cpu size={18} className="text-black" />
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img src="/Z.png" alt="ZENO Logo" className="w-full h-full object-contain" />
           </div>
           <span>ZENO</span>
         </div>
