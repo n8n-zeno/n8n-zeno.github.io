@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Terminal, Copy, Check, ArrowRight, Loader2, Sparkles, LogOut, Key } from 'lucide-react';
+import { Terminal, Copy, Check, ArrowRight, Loader2, Sparkles, LogOut, Key, Info } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import axios from 'axios';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -204,15 +204,17 @@ export default function ZenoCompiler() {
             Figma to Code, <br/>Instantly.
           </h1>
           <p className="text-[#888] text-lg max-w-lg mx-auto">
-          Generate pixel-perfect frontends instantly HTML or React. No AI guesswork, no hallucinations—just exact UI replication.
+            Generate pixel-perfect frontends instantly HTML or React. No AI guesswork, no hallucinations—just exact UI replication.
           </p>
         </div>
 
-        <div className="relative w-full max-w-[720px] mb-24">
+        <div className="relative w-full max-w-[720px] mb-24 group p-[1px] rounded-[32px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.8)] bg-white/[0.04] transition-all duration-700">
           
-          <div className="absolute -inset-[1px] bg-gradient-to-b from-[#444] via-[#111] to-transparent rounded-[32px] blur-[2px] opacity-50 pointer-events-none"></div>
-          
-          <div className="relative glass border border-[#222] rounded-[32px] flex flex-col overflow-hidden shadow-2xl bg-[#050505]">
+          <div className="absolute inset-[-100%] z-0 animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_0%,#00000000_60%,#444444_85%,#ffffff_100%)] opacity-40 group-hover:opacity-100 transition-opacity duration-1000"></div>
+
+          <div className="absolute inset-[-100%] z-0 animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_0%,#00000000_60%,#444444_85%,#ffffff_100%)] blur-lg opacity-0 group-hover:opacity-80 transition-opacity duration-1000"></div>
+
+          <div className="relative z-10 h-full w-full bg-[#050505] rounded-[31px] flex flex-col overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
             
             <div className="h-14 border-b border-[#222] bg-white/[0.02] px-6 flex items-center justify-between">
               <div className="flex items-center gap-3 text-[#888]">
@@ -258,10 +260,11 @@ export default function ZenoCompiler() {
                     </label>
                     <span className="text-[11px] text-[#444]">Node ID or Full Link</span>
                   </div>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-white/[0.02] rounded-[20px] transition-all group-focus-within:bg-white/[0.05]"></div>
+                  
+                  <div className="relative group/input">
+                    <div className="absolute inset-0 bg-white/[0.02] rounded-[20px] transition-all group-focus-within/input:bg-white/[0.05]"></div>
                     <div className="relative flex items-center">
-                      <div className="absolute left-5 text-[#444] group-focus-within:text-[#888] transition-colors">
+                      <div className="absolute left-5 text-[#444] group-focus-within/input:text-[#888] transition-colors">
                         <Sparkles size={16} />
                       </div>
                       <input
@@ -290,6 +293,15 @@ export default function ZenoCompiler() {
                       </button>
                     </div>
                   </div>
+
+                  {/* NEW SUBTLE TIP NOTE */}
+                  <div className="flex items-start gap-1.5 px-2 mt-1 opacity-80">
+                    <Info size={12} className="text-[#666] mt-[2px] flex-shrink-0" />
+                    <span className="text-[11px] text-[#666] leading-relaxed">
+                      <strong>Tip:</strong> Make sure to click on the specific UI screen or frame in your Figma canvas <em>before</em> copying the link.
+                    </span>
+                  </div>
+
                 </div>
 
                 <div className="flex gap-2 mt-2">
@@ -343,7 +355,7 @@ export default function ZenoCompiler() {
                     </button>
                   </div>
                   
-                  <div className="relative w-full rounded-[20px] border border-[#222] bg-[#1e1e1e] overflow-hidden group">
+                  <div className="relative w-full rounded-[20px] border border-[#222] bg-[#1e1e1e] overflow-hidden group/output">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none z-10"></div>
                     <div className="overflow-x-auto overflow-y-auto max-h-[400px] scrollbar-thin scrollbar-thumb-[#333] scrollbar-track-transparent">
                       <SyntaxHighlighter
