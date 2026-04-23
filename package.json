@@ -1,0 +1,9 @@
+{
+  "name": "n8n-zeno-monorepo",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npx ts-node src/index.ts",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+  }
+}
