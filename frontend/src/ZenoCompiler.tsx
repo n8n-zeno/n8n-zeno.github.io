@@ -14,6 +14,7 @@ export default function ZenoCompiler() {
   const [outputCode, setOutputCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState('Initializing compiler...');
   
   const navigate = useNavigate();
 
@@ -52,6 +53,20 @@ export default function ZenoCompiler() {
     setIsLoading(true);
     setError(null);
     setOutputCode('');
+    setLoadingMessage('Connecting to Figma...');
+
+    const messages = [
+      'Extracting Nodes...',
+      'Compiling JSX...',
+      'Optimizing Layout...',
+      'Generating Components...',
+      'Finalizing Output...'
+    ];
+    let msgIndex = 0;
+    const msgInterval = setInterval(() => {
+      setLoadingMessage(messages[msgIndex % messages.length]);
+      msgIndex++;
+    }, 3000);
 
     try {
       const response = await axios.post('http://localhost:3001/api/compile', {
@@ -61,66 +76,88 @@ export default function ZenoCompiler() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const data = response.data;
-      console.log("Compiler Response:", data);
+      const { jobId } = response.data;
       
-      let finalCode = '';
-      
-      // Helper function to deeply search for a key in the object
-      const deepSearchKey = (obj: any, targetKey: string): any => {
-        if (typeof obj !== 'object' || obj === null) return undefined;
-        if (targetKey in obj) return obj[targetKey];
-        const lowerTarget = targetKey.toLowerCase();
-        for (const key of Object.keys(obj)) {
-          if (key.toLowerCase().includes(lowerTarget)) return obj[key];
+      // Start Polling
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await axios.get(`http://localhost:3001/api/compile/status/${jobId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          const { status, result, error: jobError } = statusRes.data;
+          
+          if (status === 'completed') {
+            clearInterval(pollInterval);
+            clearInterval(msgInterval);
+            setIsLoading(false);
+            
+            const data = result;
+            let finalCode = '';
+            
+            const deepSearchKey = (obj: any, targetKey: string): any => {
+              if (typeof obj !== 'object' || obj === null) return undefined;
+              if (targetKey in obj) return obj[targetKey];
+              const lowerTarget = targetKey.toLowerCase();
+              for (const key of Object.keys(obj)) {
+                if (key.toLowerCase().includes(lowerTarget)) return obj[key];
+              }
+              for (const key of Object.keys(obj)) {
+                const result = deepSearchKey(obj[key], targetKey);
+                if (result !== undefined) return result;
+              }
+              return undefined;
+            };
+
+            if (outputFormat === 'html') {
+              const htmlNodeOutput = deepSearchKey(data, 'html') || deepSearchKey(data, 'Deterministic Compiler Engine');
+              if (htmlNodeOutput && typeof htmlNodeOutput !== 'string' && (htmlNodeOutput.rawCode || htmlNodeOutput.text || htmlNodeOutput.code)) {
+                finalCode = htmlNodeOutput.rawCode || htmlNodeOutput.text || htmlNodeOutput.code;
+              } else if (typeof htmlNodeOutput === 'string') {
+                finalCode = htmlNodeOutput;
+              } else if (data.rawCode || data.text || data.code) {
+                finalCode = data.rawCode || data.text || data.code;
+              }
+            } else {
+              const reactNodeOutput = deepSearchKey(data, 'react');
+              if (reactNodeOutput && typeof reactNodeOutput !== 'string' && (reactNodeOutput.rawCode || reactNodeOutput.text || reactNodeOutput.code)) {
+                finalCode = reactNodeOutput.rawCode || reactNodeOutput.text || reactNodeOutput.code;
+              } else if (typeof reactNodeOutput === 'string') {
+                finalCode = reactNodeOutput;
+              } else if (data.rawCode || data.code || data.text || data.reactCode) {
+                finalCode = data.rawCode || data.code || data.text || data.reactCode;
+              }
+            }
+
+            if (finalCode) {
+              setOutputCode(typeof finalCode === 'string' ? finalCode : JSON.stringify(finalCode, null, 2));
+            } else {
+              setError('Invalid response structure from compiler.');
+            }
+          } else if (status === 'failed') {
+            clearInterval(pollInterval);
+            clearInterval(msgInterval);
+            setIsLoading(false);
+            setError(jobError || 'Compilation failed on the engine.');
+          }
+        } catch (err) {
+          console.error("Polling error:", err);
         }
-        for (const key of Object.keys(obj)) {
-          const result = deepSearchKey(obj[key], targetKey);
-          if (result !== undefined) return result;
-        }
-        return undefined;
-      };
-      
-      if (outputFormat === 'html') {
-        const htmlNodeOutput = deepSearchKey(data, 'html') || deepSearchKey(data, 'Deterministic Compiler Engine');
-        
-        if (htmlNodeOutput && typeof htmlNodeOutput !== 'string' && (htmlNodeOutput.rawCode || htmlNodeOutput.text || htmlNodeOutput.code)) {
-             finalCode = htmlNodeOutput.rawCode || htmlNodeOutput.text || htmlNodeOutput.code;
-        } else if (typeof htmlNodeOutput === 'string') {
-             finalCode = htmlNodeOutput;
-        } else if (data.rawCode || data.text || data.code) {
-            finalCode = data.rawCode || data.text || data.code;
-        } else {
-            throw new Error(`Could not extract HTML code from response.`);
-        }
-      } else {
-        const reactNodeOutput = deepSearchKey(data, 'react');
-        
-        if (reactNodeOutput && typeof reactNodeOutput !== 'string' && (reactNodeOutput.rawCode || reactNodeOutput.text || reactNodeOutput.code)) {
-             finalCode = reactNodeOutput.rawCode || reactNodeOutput.text || reactNodeOutput.code;
-        } else if (typeof reactNodeOutput === 'string') {
-             finalCode = reactNodeOutput;
-        } else if (data.rawCode || data.code || data.text || data.reactCode) {
-             finalCode = data.rawCode || data.code || data.text || data.reactCode;
-        } else {
-            throw new Error(`Could not find React output in the webhook response.`);
-        }
-      }
-      
-      if (finalCode) {
-        setOutputCode(typeof finalCode === 'string' ? finalCode : JSON.stringify(finalCode, null, 2));
-      } else {
-        throw new Error('Invalid response structure from compiler.');
-      }
+      }, 2000);
+
+      // Cleanup on unmount (approximate)
+      (window as any)._zeno_poll = pollInterval;
+      (window as any)._zeno_msg = msgInterval;
+
     } catch (err: any) {
+      clearInterval(msgInterval);
+      setIsLoading(false);
       if (err.response?.data?.error === 'FIGMA_TOKEN_EXPIRED') {
         setError('Your Figma token has expired or is invalid. Please update it below.');
         setShowTokenInput(true);
       } else {
         setError(err.response?.data?.error || err.message || 'An unexpected error occurred.');
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -241,10 +278,13 @@ export default function ZenoCompiler() {
                       <button
                         type="submit"
                         disabled={isLoading || !url || (!!user && !user.figmaToken && !newToken)}
-                        className="absolute right-2 top-2 bottom-2 bg-white text-black px-6 rounded-[14px] text-[13px] font-bold hover:bg-[#DDD] transition-all disabled:opacity-20 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg"
+                        className="absolute right-2 top-2 bottom-2 bg-white text-black px-6 rounded-[14px] text-[13px] font-bold hover:bg-[#DDD] transition-all disabled:opacity-20 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg min-w-[140px] justify-center"
                       >
                         {isLoading ? (
-                          <Loader2 size={16} className="animate-spin" />
+                          <>
+                            <Loader2 size={16} className="animate-spin" />
+                            <span className="animate-pulse">{loadingMessage}</span>
+                          </>
                         ) : (
                           <>
                             Compile <ArrowRight size={16} strokeWidth={3} />

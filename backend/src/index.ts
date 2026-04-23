@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import compileRoutes from './routes/compile';
+import webhookRoutes from './routes/webhook';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/compile', compileRoutes);
+app.use('/api/webhook', webhookRoutes);
 
 const PORT = process.env.PORT || 3001;
 
