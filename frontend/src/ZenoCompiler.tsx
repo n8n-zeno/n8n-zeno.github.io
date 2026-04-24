@@ -6,6 +6,12 @@ import axios from 'axios';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+// Components
+import { Features } from './components/blocks/features-8';
+import AnimatedTextCycle from './components/ui/animated-text-cycle';
+import FeaturedSectionStats from './components/ui/featured-section-stats';
+import { Pricing } from './components/ui/single-pricing-card-1';
+
 export default function ZenoCompiler() {
   const { user, token, logout, updateUser } = useAuth();
   const [url, setUrl] = useState('');
@@ -200,9 +206,24 @@ export default function ZenoCompiler() {
             <span className="w-2 h-2 rounded-full bg-green-500"></span>
             Zeno Engine v2.0 Online
           </div>
+          
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-[#888]">
-            Figma to Code, <br/>Instantly.
+            Figma to Code,{" "}
+            <br />
+            <AnimatedTextCycle
+              words={[
+                "Instantly.",
+                "Precisely.",
+                "Perfectly.",
+                "Securely.",
+                "Blazingly.",
+                "Natively.",
+              ]}
+              interval={2500}
+              className="bg-clip-text text-transparent bg-gradient-to-b from-white to-[#888]"
+            />
           </h1>
+
           <p className="text-[#888] text-lg max-w-lg mx-auto">
             Generate pixel-perfect frontends instantly HTML or React. No AI guesswork, no hallucinations—just exact UI replication.
           </p>
@@ -294,7 +315,6 @@ export default function ZenoCompiler() {
                     </div>
                   </div>
 
-                  {/* NEW SUBTLE TIP NOTE */}
                   <div className="flex items-start gap-1.5 px-2 mt-1 opacity-80">
                     <Info size={12} className="text-[#666] mt-[2px] flex-shrink-0" />
                     <span className="text-[11px] text-[#666] leading-relaxed">
@@ -381,6 +401,21 @@ export default function ZenoCompiler() {
         </div>
 
       </main>
+
+      {/* Stats Section */}
+      <div className="relative z-10 border-t border-[#111]">
+        <FeaturedSectionStats />
+      </div>
+
+      <div className="relative z-10">
+        <Features />
+      </div>
+
+      {/* Pricing Section */}
+      <div className="relative z-10 border-t border-[#111]">
+        <Pricing />
+      </div>
+
     </div>
   );
 }
