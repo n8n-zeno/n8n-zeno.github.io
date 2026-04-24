@@ -36,7 +36,8 @@ export function Pricing() {
           className="mx-auto max-w-xl space-y-5"
         >
           <div className="flex justify-center">
-            <div className="rounded-lg border border-[#222] bg-[#111] px-4 py-1 font-mono text-[#888] text-xs tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111] border border-[#222] text-[#888] text-[11px] font-medium uppercase mb-6">
+              <span className="w-2 h-2 rounded-full bg-green-500"></span>
               Pricing
             </div>
           </div>
@@ -64,7 +65,7 @@ export function Pricing() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true }}
-            className="mx-auto w-full max-w-2xl space-y-2"
+            className="mx-auto w-full max-w-4xl space-y-2"
           >
             <div className="grid md:grid-cols-2 bg-[#050505] relative border border-[#222] p-4">
               {/* Corner plus icons */}
@@ -114,15 +115,11 @@ export function Pricing() {
               </div>
 
               {/* PRO PLAN */}
-              <div className="relative w-full rounded-lg border border-[#333] bg-[#080808] px-4 pt-5 pb-4">
-                <BorderTrail
-                  style={{
-                    boxShadow:
-                      "0px 0px 60px 30px rgb(255 255 255 / 10%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)",
-                  }}
-                  size={100}
-                />
-                <div className="space-y-1">
+              <div className="relative w-full group p-[1px] rounded-lg overflow-hidden bg-[#222] transition-all duration-700">
+                <div className="absolute inset-[-100%] z-0 animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_0%,#00000000_60%,#444444_85%,#ffffff_100%)] opacity-40 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                <div className="absolute inset-[-100%] z-0 animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_0%,#00000000_60%,#444444_85%,#ffffff_100%)] blur-lg opacity-0 group-hover:opacity-80 transition-opacity duration-1000"></div>
+                <div className="relative z-10 h-full w-full bg-[#080808] rounded-lg px-4 pt-5 pb-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                  <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Zap className="size-4 text-white" />
@@ -159,6 +156,7 @@ export function Pricing() {
                     <a href="/signup">Upgrade to Pro</a>
                   </Button>
                 </div>
+              </div>
               </div>
             </div>
 

@@ -183,7 +183,9 @@ export default function ZenoCompiler() {
           <span>ZENO</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-[#888]">
-          {user && <span>{user.email}</span>}
+          <a href="#compiler" className="hover:text-white transition-colors">Compiler</a>
+          <a href="#features" className="hover:text-white transition-colors">Features</a>
+          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
         </div>
         <div className="flex items-center gap-4">
           {user ? (
@@ -199,7 +201,7 @@ export default function ZenoCompiler() {
         </div>
       </nav>
 
-      <main className="relative z-10 flex flex-col items-center pt-16 pb-32 px-6">
+      <main id="compiler" className="relative z-10 flex flex-col items-center pt-16 pb-32 px-6">
         
         <div className="text-center mb-16 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111] border border-[#222] text-[#888] text-[11px] font-medium mb-6">
@@ -407,7 +409,7 @@ export default function ZenoCompiler() {
         <FeaturedSectionStats />
       </div>
 
-      <div className="relative z-10">
+      <div id="features" className="relative z-10">
         <Features />
       </div>
 
