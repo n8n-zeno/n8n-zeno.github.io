@@ -76,8 +76,8 @@ import {
               <p className="text-[#888] text-md">Figma Frames Compiled</p>
             </div>
             <div>
-              <p className="text-3xl font-medium text-white">99.9%</p>
-              <p className="text-[#888] text-md">Uptime Guarantee</p>
+              <p className="text-3xl font-medium text-white">98%</p>
+              <p className="text-[#888] text-md">Accurate Code</p>
             </div>
             <div>
               <p className="text-3xl font-medium text-white">2,400+</p>

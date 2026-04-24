@@ -38,7 +38,7 @@ export function Features() {
                                             fill="currentColor"
                                         />
                                     </svg>
-                                    <span className="mx-auto block w-fit text-5xl font-semibold text-white">100%</span>
+                                    <span className="mx-auto block w-fit text-5xl font-semibold text-white">98%</span>
                                 </div>
                                 <h2 className="mt-6 text-center text-3xl font-semibold text-white">Deterministic</h2>
                                 <p className="mt-2 text-center text-[#666] text-sm">No AI hallucinations. Every compile is exact and repeatable.</p>
