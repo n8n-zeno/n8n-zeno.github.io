@@ -91,6 +91,6 @@ ZENO's backend acts as a secure proxy. The frontend never communicates directly 
 
 
 Start server
-1.cd backend && npx ts-node src/index.ts
+1.npx ts-node-dev src/index.ts
 2.cd frontend && npm run dev
 3.Npx n8n
