@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { GradientMesh } from '../components/ui/gradient-mesh';
 import {
   Field,
   FieldDescription,
@@ -161,18 +160,12 @@ const Signup: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Panel — Gradient Mesh */}
+      {/* Right Panel — Image Mockup */}
       <div className="relative hidden lg:block">
-        <GradientMesh
-          colors={['#bcecf6', '#00aaff', '#ffd447']}
-          distortion={8}
-          swirl={0.2}
-          speed={1}
-          rotation={90}
-          waveAmp={0.2}
-          waveFreq={20}
-          waveSpeed={0.2}
-          grain={0.06}
+        <img
+          src="/123.png"
+          alt="ZENO Mockup"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
     </div>
