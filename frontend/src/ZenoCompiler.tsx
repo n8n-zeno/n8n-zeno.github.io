@@ -11,6 +11,8 @@ import { Features } from './components/blocks/features-8';
 import AnimatedTextCycle from './components/ui/animated-text-cycle';
 import FeaturedSectionStats from './components/ui/featured-section-stats';
 import { Pricing } from './components/ui/single-pricing-card-1';
+import { Faq } from './components/ui/faq';
+import { Footer } from './components/ui/footer';
 
 export default function ZenoCompiler() {
   const { user, token, logout, updateUser } = useAuth();
@@ -186,6 +188,7 @@ export default function ZenoCompiler() {
           <a href="#compiler" className="hover:text-white transition-colors">Compiler</a>
           <a href="#features" className="hover:text-white transition-colors">Features</a>
           <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+          <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
         </div>
         <div className="flex items-center gap-4">
           {user ? (
@@ -418,6 +421,13 @@ export default function ZenoCompiler() {
         <Pricing />
       </div>
 
+      {/* FAQ Section */}
+      <div id="faq" className="relative z-10 border-t border-[#111]">
+        <Faq />
+      </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
