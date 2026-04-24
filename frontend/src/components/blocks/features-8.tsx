@@ -1,6 +1,6 @@
 // src/components/blocks/features-8.tsx
 import { Card, CardContent } from '@/components/ui/card'
-import { Shield, Users, Zap, Lock, Code2, GitBranch } from 'lucide-react'
+import { Lock, Code2, GitBranch } from 'lucide-react'
 
 export function Features() {
     return (

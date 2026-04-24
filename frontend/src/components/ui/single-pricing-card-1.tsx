@@ -1,10 +1,8 @@
-import React from "react";
 import { PlusIcon, ShieldCheckIcon, Zap, Gift } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
-import { BorderTrail } from "./border-trail";
 
 const freeFeatures = [
   "2 compiles every 15 days",
