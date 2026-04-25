@@ -26,13 +26,13 @@ import {
   
   export default function FeaturedSectionStats() {
     const data = [
-      { name: "Jan", value: 12 },
-      { name: "Feb", value: 35 },
-      { name: "Mar", value: 58 },
-      { name: "Apr", value: 90 },
-      { name: "May", value: 134 },
-      { name: "Jun", value: 189 },
-      { name: "Jul", value: 260 },
+      { name: "Jan", value: 120 },
+      { name: "Feb", value: 350 },
+      { name: "Mar", value: 580 },
+      { name: "Apr", value: 900 },
+      { name: "May", value: 1140 },
+      { name: "Jun", value: 1290 },
+      { name: "Jul", value: 1460 },
     ];
   
     return (
@@ -76,11 +76,11 @@ import {
               <p className="text-[#888] text-md">Figma Frames Compiled</p>
             </div>
             <div>
-              <p className="text-3xl font-medium text-white">98%</p>
-              <p className="text-[#888] text-md">Accurate Code</p>
+              <p className="text-3xl font-medium text-white">98.5%</p>
+              <p className="text-[#888] text-md">Accurate Output</p>
             </div>
             <div>
-              <p className="text-3xl font-medium text-white">2,400+</p>
+              <p className="text-3xl font-medium text-white">1,400+</p>
               <p className="text-[#888] text-md">Developers Using Zeno</p>
             </div>
             <div>
