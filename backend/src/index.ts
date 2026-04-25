@@ -5,6 +5,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import compileRoutes from './routes/compile';
 import webhookRoutes from './routes/webhook';
+import stripeRoutes from './routes/stripe';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/compile', compileRoutes);
 app.use('/api/webhook', webhookRoutes);
+app.use('/api/stripe', stripeRoutes);
 
 const PORT = process.env.PORT || 3001;
 

@@ -3,6 +3,7 @@ import ZenoCompiler from './ZenoCompiler';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Checkout from './pages/Checkout';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout-success" element={<CheckoutSuccess />} />
           <Route path="/" element={<ZenoCompiler />} />
         </Routes>
       </Router>

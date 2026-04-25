@@ -17,14 +17,45 @@ const Checkout: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    // Simulate payment processing
-    setTimeout(() => {
+    
+    try {
+      // API base URL - adjust if needed for production
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      
+      const response = await fetch(`${apiUrl}/api/stripe/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include auth token if your backend requires it:
+          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          // Optional: pass a specific price ID here, 
+          // or rely on the backend's STRIPE_PRICE_ID env var
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
+      }
+
+      const { url } = await response.json();
+      
+      // Redirect to Stripe Hosted Checkout
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      alert('Failed to initiate checkout. Please ensure Stripe keys are configured in the backend.');
       setIsProcessing(false);
-      navigate('/');
-    }, 2000);
+    }
   };
 
   const nextMonth = new Date();
@@ -74,7 +105,7 @@ const Checkout: React.FC = () => {
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    required
+                    
                     className="bg-[#0a0a0a] border-[#222] text-white placeholder-zinc-600 hover:border-[#333] focus-visible:ring-[#444] focus-visible:border-[#444] transition-colors rounded-[10px] h-11 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]"
                   />
               </Field>
@@ -94,7 +125,7 @@ const Checkout: React.FC = () => {
                     placeholder="0000 0000 0000 0000"
                     value={cardNumber}
                     onChange={(e) => setCardNumber(e.target.value)}
-                    required
+                    
                     maxLength={19}
                     className="bg-[#0a0a0a] border-[#222] text-white placeholder-zinc-600 hover:border-[#333] focus-visible:ring-[#444] focus-visible:border-[#444] transition-colors rounded-[10px] h-11 pl-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]"
                   />
@@ -117,7 +148,7 @@ const Checkout: React.FC = () => {
                       placeholder="MM/YY"
                       value={expiry}
                       onChange={(e) => setExpiry(e.target.value)}
-                      required
+                      
                       maxLength={5}
                       className="bg-[#0a0a0a] border-[#222] text-white placeholder-zinc-600 hover:border-[#333] focus-visible:ring-[#444] focus-visible:border-[#444] transition-colors rounded-[10px] h-11 pl-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]"
                     />
@@ -138,7 +169,7 @@ const Checkout: React.FC = () => {
                       placeholder="123"
                       value={cvc}
                       onChange={(e) => setCvc(e.target.value)}
-                      required
+                      
                       maxLength={4}
                       className="bg-[#0a0a0a] border-[#222] text-white placeholder-zinc-600 hover:border-[#333] focus-visible:ring-[#444] focus-visible:border-[#444] transition-colors rounded-[10px] h-11 pl-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]"
                     />
