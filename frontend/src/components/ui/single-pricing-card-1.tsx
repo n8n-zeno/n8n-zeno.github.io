@@ -151,7 +151,7 @@ export function Pricing() {
                   </ul>
 
                   <Button className="w-full mt-4" asChild>
-                    <a href="/signup">Upgrade to Pro</a>
+                    <a href="/checkout">Upgrade to Pro</a>
                   </Button>
                 </div>
               </div>

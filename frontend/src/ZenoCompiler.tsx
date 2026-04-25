@@ -138,7 +138,14 @@ export default function ZenoCompiler() {
             clearInterval(pollInterval);
             clearInterval(msgInterval);
             setIsLoading(false);
-            setError(jobError || 'Compilation failed on the engine.');
+            
+            const errorStr = (jobError || '').toLowerCase();
+            if (errorStr.includes('token') || errorStr.includes('unauthorized') || errorStr.includes('403') || errorStr.includes('401')) {
+              setError('Your Figma token has expired or is invalid. Please update it below.');
+              setShowTokenInput(true);
+            } else {
+              setError(jobError || 'Compilation failed on the engine.');
+            }
           }
         } catch (err) {
           console.error("Polling error:", err);
@@ -260,20 +267,25 @@ export default function ZenoCompiler() {
                     <span className="text-sm font-bold text-white">Update Figma Token</span>
                     <a href="https://www.figma.com/settings" target="_blank" rel="noreferrer" className="text-[11px] text-[#888] hover:text-white transition-colors underline">Get PAT</a>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <div className="absolute left-3 top-3 text-[#666]"><Key size={14} /></div>
-                      <input
-                        type="password"
-                        value={newToken}
-                        onChange={(e) => setNewToken(e.target.value)}
-                        placeholder="figd_..."
-                        className="w-full bg-black border border-[#333] rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:border-[#555] outline-none"
-                      />
+                  <div className="flex flex-col gap-1">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <div className="absolute left-3 top-3 text-[#666]"><Key size={14} /></div>
+                        <input
+                          type="password"
+                          value={newToken}
+                          onChange={(e) => setNewToken(e.target.value)}
+                          placeholder="figd_..."
+                          className="w-full bg-black border border-[#333] rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:border-[#555] outline-none"
+                        />
+                      </div>
+                      <button onClick={handleUpdateToken} className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#ddd]">
+                        Save
+                      </button>
                     </div>
-                    <button onClick={handleUpdateToken} className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#ddd]">
-                      Save
-                    </button>
+                    <p className="text-[11px] text-[#666] pl-1">
+                      Tip: Please ensure you select <strong>"File content: Read"</strong> when creating your token.
+                    </p>
                   </div>
                 </div>
               )}
