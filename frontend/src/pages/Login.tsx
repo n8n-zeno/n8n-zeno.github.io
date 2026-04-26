@@ -34,6 +34,10 @@ const Login: React.FC = () => {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
+      <Helmet>
+        <title>Login | ZENO Compiler</title>
+        <meta name="description" content="Sign in to your ZENO account to start compiling Figma designs to high-quality code." />
+      </Helmet>
       {/* Left Panel */}
       <div className="flex flex-col gap-4 p-6 md:p-10 bg-black">
         {/* Logo and Back Button */}

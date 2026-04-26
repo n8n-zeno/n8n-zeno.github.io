@@ -181,6 +181,10 @@ export default function ZenoCompiler() {
 
   return (
     <div className="min-h-screen bg-[#000] text-[#EAEAEA] selection:bg-[#333] selection:text-white font-sans overflow-x-hidden">
+      <Helmet>
+        <title>ZENO | Figma to Code, Instantly.</title>
+        <meta name="description" content="ZENO is a deterministic Figma-to-code compiler that generates pixel-perfect React and HTML from your designs instantly." />
+      </Helmet>
       
       <div className="fixed inset-0 grid-background pointer-events-none"></div>
 

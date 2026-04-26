@@ -36,6 +36,10 @@ const Signup: React.FC = () => {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
+      <Helmet>
+        <title>Create Account | ZENO Compiler</title>
+        <meta name="description" content="Create a ZENO account to instantly convert Figma designs into production-ready React and HTML code." />
+      </Helmet>
       {/* Left Panel */}
       <div className="flex flex-col gap-4 p-6 md:p-10 bg-black">
         {/* Logo and Back Button */}
