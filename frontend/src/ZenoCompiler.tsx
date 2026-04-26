@@ -42,7 +42,7 @@ export default function ZenoCompiler() {
     if (!newToken.trim()) return;
     
     try {
-      const res = await axios.put('http://localhost:3001/api/user/figma-token', { figmaToken: newToken }, {
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/user/figma-token`, { figmaToken: newToken }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       updateUser(res.data.user);
