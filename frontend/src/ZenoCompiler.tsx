@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Terminal, Copy, Check, ArrowRight, Loader2, Sparkles, LogOut, Key, Info } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import axios from 'axios';
