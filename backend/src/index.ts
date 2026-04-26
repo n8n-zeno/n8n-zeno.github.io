@@ -14,7 +14,7 @@ const app = express();
 // 2. LOCK DOWN CORS
 app.use(cors({ 
   origin: 'https://n8n-zeno.github.io', 
-  methods: ['GET', 'POST'], 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
   credentials: true 
 }));
 
