@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     prerender({
       routes: ['/', '/login', '/signup', '/checkout'],
-      renderer: '@prerenderer/renderer-jsdom',
+      renderer: '@prerenderer/renderer-puppeteer',
       server: {
         port: 3000,
         host: 'localhost',
