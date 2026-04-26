@@ -17,11 +17,12 @@ model User {
 }
 
 model CompileJob {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  status    String   @default("pending") // 'pending', 'completed', 'failed'
-  result    String?
-  error     String?
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  status       String   @default("pending") // 'pending', 'completed', 'failed'
+  inputPayload Json?
+  result       String?
+  error        String?
+  createdAt    DateTime @default(now())
 }

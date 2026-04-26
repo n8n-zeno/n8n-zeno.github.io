@@ -1,8 +1,12 @@
 import { Router, Response } from 'express';
 import prisma from '../prismaClient';
 import { authenticate, AuthRequest } from '../middleware/authMiddleware';
+import PQueue from 'p-queue';
 
 const router = Router();
+
+// Initialize PQueue with concurrency 3
+const queue = new PQueue({ concurrency: 3 });
 
 router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -31,31 +35,55 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
       }
     }
 
+    // a) Accept the 50MB payload and immediately save it to PostgreSQL via Prisma with a status of 'pending'
     const job = await prisma.compileJob.create({
       data: {
         userId: user.id,
         status: 'pending',
+        inputPayload: req.body // Saving the payload
       }
     });
 
-    const n8nUrl = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/compile-figma';
-    fetch(n8nUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jobId: job.id,
-        figmaUrl: url,
-        figmaToken: user.figmaToken,
-        outputFormat: outputFormat,
-        format: outputFormat,
-        react: outputFormat === 'react',
-        html: outputFormat === 'html'
-      }),
-    }).catch(error => console.error("Error triggering n8n webhook:", error));
+    // b) Immediately return a 202 Accepted response to the frontend
+    res.status(202).json({ message: "Job Queued", jobId: job.id, status: 'pending' });
 
-    res.status(202).json({ jobId: job.id, status: 'pending' });
+    // c) Add the job to a PQueue instance configured with concurrency: 3
+    // d) The queue worker should then be the function that actually fires the internal HTTP request
+    queue.add(async () => {
+      try {
+        const n8nUrl = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/compile-figma';
+        
+        const response = await fetch(n8nUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jobId: job.id,
+            figmaUrl: url,
+            figmaToken: user.figmaToken,
+            outputFormat: outputFormat,
+            format: outputFormat,
+            react: outputFormat === 'react',
+            html: outputFormat === 'html'
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`n8n responded with ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`Error processing job ${job.id} in queue:`, error);
+        // Optionally update job status to failed if n8n trigger fails
+        await prisma.compileJob.update({
+          where: { id: job.id },
+          data: { 
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Failed to trigger n8n webhook'
+          }
+        });
+      }
+    });
 
   } catch (error) {
     console.error('Compile proxy error:', error);
@@ -81,8 +109,6 @@ router.get('/status/:jobId', authenticate, async (req: AuthRequest, res: Respons
       return;
     }
 
-    // 🚀 NEW FIX: Let express safely encode the massive string.
-    // This avoids the JSON.parse memory crash but prevents invalid JSON formats.
     res.json({
       status: job.status,
       error: job.error,
