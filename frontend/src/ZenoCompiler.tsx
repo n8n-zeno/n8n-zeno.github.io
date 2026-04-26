@@ -97,7 +97,7 @@ export default function ZenoCompiler() {
         (window as any)._zeno_fetching = true;
 
         try {
-          const statusRes = await axios.get(`http://localhost:3001/api/compile/status/${jobId}`, {
+          const statusRes = await axios.get(`${import.meta.env.VITE_API_URL}/compile/status/${jobId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           
