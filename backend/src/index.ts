@@ -12,23 +12,7 @@ dotenv.config();
 const app = express();
 
 // 2. LOCK DOWN CORS
-const allowedOrigins = [
-  'https://n8n-zeno.github.io',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:3000'
-];
-app.use(cors({ 
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  credentials: true 
-}));
+app.use(cors({ origin: '*' }));
 
 // 1. FIX STRIPE WEBHOOK ORDER
 // We must prevent the global JSON parser from destroying the raw buffer needed for Stripe signature verification.
