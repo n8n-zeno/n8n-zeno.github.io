@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { CreditCard, Calendar, Lock, ShieldCheck, Zap } from 'lucide-react';
 import {
   Field,
@@ -15,7 +15,6 @@ const Checkout: React.FC = () => {
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
