@@ -43,7 +43,7 @@ export default function ZenoCompiler() {
     if (!newToken.trim()) return;
     
     try {
-      const res = await axios.put(`${import.meta.env.VITE_API_URL}/user/figma-token`, { figmaToken: newToken }, {
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/user/figma-token`, { figmaToken: newToken }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       updateUser(res.data.user);
@@ -82,7 +82,7 @@ export default function ZenoCompiler() {
     (window as any)._zeno_msg = msgInterval;
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/compile`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/compile`, {
         url,
         outputFormat,
       }, {
@@ -98,7 +98,7 @@ export default function ZenoCompiler() {
         (window as any)._zeno_fetching = true;
 
         try {
-          const statusRes = await axios.get(`${import.meta.env.VITE_API_URL}/compile/status/${jobId}`, {
+          const statusRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/compile/status/${jobId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           
