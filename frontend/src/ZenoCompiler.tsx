@@ -152,7 +152,7 @@ export default function ZenoCompiler() {
         } finally {
           (window as any)._zeno_fetching = false; 
         }
-      }, 2000);
+      }, 5000);
       
       (window as any)._zeno_poll = pollInterval;
 

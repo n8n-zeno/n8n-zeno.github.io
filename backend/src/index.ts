@@ -10,9 +10,21 @@ import stripeRoutes from './routes/stripe';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// 2. LOCK DOWN CORS
+app.use(cors({ 
+  origin: 'https://n8n-zeno.github.io', 
+  methods: ['GET', 'POST'], 
+  credentials: true 
+}));
+
+// 1. FIX STRIPE WEBHOOK ORDER
+// We must prevent the global JSON parser from destroying the raw buffer needed for Stripe signature verification.
+// Apply express.raw strictly to the Stripe webhook route BEFORE global parsers.
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes);
 
 // Increase the JSON payload limit to 50mb to prevent n8n webhook rejection
+// These must come AFTER Stripe webhook route
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

@@ -57,6 +57,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Zeno-Secret': process.env.N8N_API_KEY || 'default_dev_key'
           },
           body: JSON.stringify({
             jobId: job.id,
