@@ -13,7 +13,10 @@ dotenv.config();
 const app = express();
 
 // 2. LOCK DOWN CORS
-app.use(cors({ origin: '*' }));
+app.use(cors({
+  origin: '*',
+  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning']
+}));
 
 app.use((req, res, next) => {
   if (req.path.includes('/api/auth')) {
