@@ -82,7 +82,7 @@ export default function ZenoCompiler() {
     (window as any)._zeno_msg = msgInterval;
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/compile`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/compile`, {
         url,
         outputFormat,
       }, {
