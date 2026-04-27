@@ -4,7 +4,8 @@
   "scripts": {
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npx ts-node src/index.ts",
-    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "prepare": "husky"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.8",
@@ -17,6 +18,18 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.{js,jsx,ts,tsx}": [
+      "cd frontend && npm run lint",
+      "cd frontend && npm run test run"
+    ],
+    "backend/src/**/*.ts": [
+      "cd backend && npm run lint",
+      "cd backend && npm run test"
+    ]
   }
 }
