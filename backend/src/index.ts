@@ -6,6 +6,7 @@ import userRoutes from './routes/user';
 import compileRoutes from './routes/compile';
 import webhookRoutes from './routes/webhook';
 import stripeRoutes from './routes/stripe';
+import prisma from './prismaClient';
 
 dotenv.config();
 
@@ -13,6 +14,13 @@ const app = express();
 
 // 2. LOCK DOWN CORS
 app.use(cors({ origin: '*' }));
+
+app.use((req, res, next) => {
+  if (req.path.includes('/api/auth')) {
+    console.log(`[API TRAFFIC] ${req.method} ${req.path}`);
+  }
+  next();
+});
 
 // 1. FIX STRIPE WEBHOOK ORDER
 // We must prevent the global JSON parser from destroying the raw buffer needed for Stripe signature verification.
@@ -32,6 +40,12 @@ app.use('/api/stripe', stripeRoutes);
 
 const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, () => {
-  console.log(`Backend server running on port ${PORT}`);
+app.listen(PORT, async () => {
+  console.log(`📡 Backend server running on port ${PORT}`);
+  try {
+    await prisma.$connect();
+    console.log(`✅ Neon Database Connected Successfully`);
+  } catch (err: any) {
+    console.error(`❌ Neon Database Connection FAILED:`, err.message);
+  }
 });
