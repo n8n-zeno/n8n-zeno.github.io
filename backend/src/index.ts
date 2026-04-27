@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
@@ -15,7 +16,8 @@ const app = express();
 // 2. LOCK DOWN CORS
 app.use(cors({
   origin: '*',
-  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning']
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: '*'
 }));
 
 app.use((req, res, next) => {
@@ -40,6 +42,13 @@ app.use('/api/user', userRoutes);
 app.use('/api/compile', compileRoutes);
 app.use('/api/webhook', webhookRoutes);
 app.use('/api/stripe', stripeRoutes);
+
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+app.get(/.*/, (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 
