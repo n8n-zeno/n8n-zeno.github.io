@@ -10,10 +10,9 @@ BACKEND_PID=$!
 sleep 4
 
 # Punch the SSH Tunnel to the internet
-echo "☁️ Initializing localhost.run SSH Tunnel on port 3001..."
-echo "⚠️ COPY THE '.lhr.life' URL BELOW AND UPDATE frontend/.env AND STRIPE WEBHOOKS"
+echo "☁️ Initializing Serveo SSH Tunnel on port 3001..."
 echo "------------------------------------------------------------"
-ngrok http --domain=elsewhere-varied-curler.ngrok-free.dev 3001
+ssh -R zeno-ahmed-api:80:localhost:3001 serveo.net
 
 # Cleanup backend if tunnel is closed
 kill $BACKEND_PID

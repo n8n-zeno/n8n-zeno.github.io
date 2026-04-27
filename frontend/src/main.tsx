@@ -5,11 +5,11 @@ import axios from 'axios';
 import './index.css';
 import App from './App.tsx'
 
-axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
-
 if (!Object.hasOwn) {
   Object.hasOwn = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
 }
+
+axios.defaults.headers.common['Bypass-Tunnel-Reminder'] = 'true';
 
 const rootElement = document.getElementById('root')!;
 
