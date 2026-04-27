@@ -13,7 +13,7 @@ sleep 4
 echo "☁️ Initializing localhost.run SSH Tunnel on port 3001..."
 echo "⚠️ COPY THE '.lhr.life' URL BELOW AND UPDATE frontend/.env AND STRIPE WEBHOOKS"
 echo "------------------------------------------------------------"
-ssh -R 80:localhost:3001 localhost.run
+ngrok http --domain=elsewhere-varied-curler.ngrok-free.dev 3001
 
 # Cleanup backend if tunnel is closed
 kill $BACKEND_PID
