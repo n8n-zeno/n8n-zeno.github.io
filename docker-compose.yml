@@ -4,10 +4,8 @@ services:
   db:
     image: postgres:15-alpine
     restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: ${POSTGRES_DB:-zeno}
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
