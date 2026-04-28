@@ -36,22 +36,23 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
     }
 
     // a) Accept the 50MB payload and immediately save it to PostgreSQL via Prisma with a status of 'pending'
-    const job = await prisma.compileJob.create({
+    const job = await prisma.job.create({
       data: {
         userId: user.id,
         status: 'pending',
-        inputPayload: req.body // Saving the payload
+        inputPayload: req.body, // Saving the payload
+        figmaUrl: url
       }
     });
 
     // b) Immediately return a 202 Accepted response to the frontend
-    res.status(202).json({ message: "Job Queued", jobId: job.id, status: 'pending' });
+    res.status(202).json({ message: "Job Queued", jobId: job.jobId, status: 'pending' });
 
     // c) Add the job to a PQueue instance configured with concurrency: 3
     // d) The queue worker should then be the function that actually fires the internal HTTP request
     queue.add(async () => {
       try {
-        const n8nUrl = process.env.N8N_WEBHOOK_URL || 'http://92.5.72.190:5678/webhook/compile-figma';
+        const n8nUrl = process.env.N8N_WEBHOOK_URL || 'http://n8n:5678/webhook/compile-figma';
         
         const response = await fetch(n8nUrl, {
           method: 'POST',
@@ -75,7 +76,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
         }
       } catch (error) {
         console.error(`Error processing job ${job.jobId} in queue:`, error);
-        // Optionally update job status to failed if n8n trigger fails
+        // Update job status to failed if n8n trigger fails
         await prisma.job.update({
           where: { jobId: job.jobId },
           data: { 
@@ -96,8 +97,8 @@ router.get('/status/:jobId', authenticate, async (req: AuthRequest, res: Respons
   try {
     const jobId = req.params.jobId as string;
 
-    const job = await prisma.compileJob.findUnique({
-      where: { id: jobId },
+    const job = await prisma.job.findUnique({
+      where: { jobId: jobId },
     });
 
     if (!job) {
@@ -113,7 +114,7 @@ router.get('/status/:jobId', authenticate, async (req: AuthRequest, res: Respons
     res.json({
       status: job.status,
       error: job.error,
-      result: job.result
+      result: job.rawCode
     });
 
   } catch (error) {
