@@ -47,9 +47,9 @@ services:
       - n8n
 
   tunnel:
-    image: efrecon/localtunnel
+    image: node:20-alpine
     restart: always
-    command: ["--port", "80", "--local-host", "nginx", "--subdomain", "zeno-ahmed-api-2026"]
+    command: sh -c "npx localtunnel --port 80 --local-host nginx --subdomain zeno-ahmed-api-2026"
     depends_on:
       - nginx
 
