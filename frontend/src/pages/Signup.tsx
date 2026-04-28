@@ -27,6 +27,8 @@ const Signup: React.FC = () => {
         email,
         password,
         figmaToken,
+      }, {
+        headers: { "bypass-tunnel-reminder": "true", "ngrok-skip-browser-warning": "true" }
       });
       login(res.data.token, res.data.user);
       navigate('/');

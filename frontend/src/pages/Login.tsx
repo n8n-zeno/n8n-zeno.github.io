@@ -25,6 +25,8 @@ const Login: React.FC = () => {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signin`, {
         email,
         password,
+      }, {
+        headers: { "bypass-tunnel-reminder": "true", "ngrok-skip-browser-warning": "true" }
       });
       login(res.data.token, res.data.user);
       navigate('/');
