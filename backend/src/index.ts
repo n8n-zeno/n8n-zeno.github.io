@@ -13,38 +13,61 @@ dotenv.config();
 
 const app = express();
 
-// 2. LOCK DOWN CORS
-app.options('*', cors());
+/**
+ * 1. CORS CONFIGURATION
+ * app.options('*') handles the "Preflight" requests specifically for tunnels (Serveo/Cloudflare).
+ * We explicitly allow the GitHub Pages origin and necessary bypass headers.
+ */
+app.options('*', cors()); 
 app.use(cors({ 
   origin: 'https://n8n-zeno.github.io', 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'bypass-tunnel-reminder', 'ngrok-skip-browser-warning', 'x-requested-with'] 
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'bypass-tunnel-reminder', 
+    'ngrok-skip-browser-warning', 
+    'x-requested-with'
+  ] 
 }));
 
+/**
+ * 2. STRIPE WEBHOOK RAW PARSER
+ * This MUST run before any other express.json() middleware. 
+ * Stripe requires the raw body buffer to verify signatures correctly.
+ */
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes);
+
+/**
+ * 3. GLOBAL PAYLOAD PARSERS
+ * Increased to 50mb to handle large Figma-to-Code payloads from n8n.
+ */
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Optional: Traffic logging for debugging auth flow
 app.use((req, res, next) => {
   if (req.path.includes('/api/auth')) {
-    console.log(`[API TRAFFIC] ${req.method} ${req.path}`);
+    console.log(`[AUTH-DEBUG] ${req.method} ${req.path}`);
   }
   next();
 });
 
-// 1. FIX STRIPE WEBHOOK ORDER
-// We must prevent the global JSON parser from destroying the raw buffer needed for Stripe signature verification.
-// Apply express.raw strictly to the Stripe webhook route BEFORE global parsers.
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes);
-
-// Increase the JSON payload limit to 50mb to prevent n8n webhook rejection
-// These must come AFTER Stripe webhook route
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
+/**
+ * 4. API ROUTES
+ */
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/compile', compileRoutes);
 app.use('/api/webhook', webhookRoutes);
 app.use('/api/stripe', stripeRoutes);
 
+/**
+ * 5. STATIC FRONTEND SERVING
+ * Serves the React 'dist' folder. If a request is not for an /api route, 
+ * it sends index.html to allow React Router to handle the navigation.
+ */
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 app.get(/.*/, (req, res) => {
   if (!req.path.startsWith('/api')) {
@@ -54,9 +77,13 @@ app.get(/.*/, (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+/**
+ * 6. SERVER STARTUP & DATABASE CONNECTION
+ */
 app.listen(PORT, async () => {
   console.log(`📡 Backend server running on port ${PORT}`);
   try {
+    // Verifies connectivity to the PostgreSQL container/external DB
     await prisma.$connect();
     console.log(`✅ PostgreSQL Connected Successfully`);
   } catch (err: any) {
