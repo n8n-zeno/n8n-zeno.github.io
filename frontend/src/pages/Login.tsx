@@ -26,7 +26,7 @@ const Login: React.FC = () => {
         email,
         password,
       }, {
-        headers: { "bypass-tunnel-reminder": "true", "ngrok-skip-browser-warning": "true" }
+        headers: { "bypass-tunnel-reminder": "true" }
       });
       login(res.data.token, res.data.user);
       navigate('/');
