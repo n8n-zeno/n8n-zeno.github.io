@@ -46,6 +46,13 @@ services:
       - backend
       - n8n
 
+  tunnel:
+    image: efrecon/localtunnel
+    restart: always
+    command: ["--port", "80", "--local-host", "nginx", "--subdomain", "zeno-ahmed-api-2026"]
+    depends_on:
+      - nginx
+
 volumes:
   postgres_data:
   n8n_data:
