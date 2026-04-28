@@ -52,8 +52,8 @@ app.listen(PORT, async () => {
   console.log(`📡 Backend server running on port ${PORT}`);
   try {
     await prisma.$connect();
-    console.log(`✅ Neon Database Connected Successfully`);
+    console.log(`✅ PostgreSQL Connected Successfully`);
   } catch (err: any) {
-    console.error(`❌ Neon Database Connection FAILED:`, err.message);
+    console.error(`❌ PostgreSQL Connection FAILED:`, err.message);
   }
 });
