@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "node --max-old-space-size=8192 -r ts-node/register src/index.ts",
+    "dev": "node --max-old-space-size=512 -r ts-node/register src/index.ts",
     "build": "npx tsc",
-    "start": "node --max-old-space-size=8192 dist/src/index.js",
+    "start": "node --max-old-space-size=512 dist/src/index.js",
     "test": "jest",
     "lint": "eslint \"src/**/*.ts\""
   },

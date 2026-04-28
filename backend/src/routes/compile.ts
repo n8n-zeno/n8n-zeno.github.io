@@ -51,7 +51,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
     // d) The queue worker should then be the function that actually fires the internal HTTP request
     queue.add(async () => {
       try {
-        const n8nUrl = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/compile-figma';
+        const n8nUrl = process.env.N8N_WEBHOOK_URL || 'http://92.5.72.190:5678/webhook/compile-figma';
         
         const response = await fetch(n8nUrl, {
           method: 'POST',
@@ -60,7 +60,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
             'X-Zeno-Secret': process.env.N8N_API_KEY || 'default_dev_key'
           },
           body: JSON.stringify({
-            jobId: job.id,
+            jobId: job.jobId,
             figmaUrl: url,
             figmaToken: user.figmaToken,
             outputFormat: outputFormat,
@@ -74,10 +74,10 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
           throw new Error(`n8n responded with ${response.status}`);
         }
       } catch (error) {
-        console.error(`Error processing job ${job.id} in queue:`, error);
+        console.error(`Error processing job ${job.jobId} in queue:`, error);
         // Optionally update job status to failed if n8n trigger fails
-        await prisma.compileJob.update({
-          where: { id: job.id },
+        await prisma.job.update({
+          where: { jobId: job.jobId },
           data: { 
             status: 'failed',
             error: error instanceof Error ? error.message : 'Failed to trigger n8n webhook'

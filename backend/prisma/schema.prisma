@@ -13,16 +13,17 @@ model User {
   password   String
   figmaToken String?
   createdAt  DateTime     @default(now())
-  jobs       CompileJob[]
+  jobs       Job[]
 }
 
-model CompileJob {
-  id           String   @id @default(uuid())
+model Job {
+  jobId        String   @id @default(uuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id])
   status       String   @default("pending") // 'pending', 'completed', 'failed'
+  figmaUrl     String?
+  rawCode      String?
   inputPayload Json?
-  result       String?
   error        String?
   createdAt    DateTime @default(now())
 }
