@@ -20,7 +20,7 @@ const app = express();
  */
 app.options('*', cors()); 
 app.use(cors({ 
-  origin: 'https://n8n-zeno.github.io', 
+  origin: true, 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
