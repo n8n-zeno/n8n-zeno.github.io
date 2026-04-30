@@ -80,7 +80,7 @@ const PORT = process.env.PORT || 3001;
 /**
  * 6. SERVER STARTUP & DATABASE CONNECTION
  */
-app.listen(PORT, async () => {
+app.listen(Number(PORT), '0.0.0.0', async () => {
   console.log(`📡 Backend server running on port ${PORT}`);
   try {
     // Verifies connectivity to the PostgreSQL container/external DB
