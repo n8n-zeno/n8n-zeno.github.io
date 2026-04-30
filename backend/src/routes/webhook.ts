@@ -17,7 +17,7 @@ router.post('/n8n-result', async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const cleanJobId = String(jobId).trim();
+    const cleanJobId = String(jobId).replace(/['"]/g, '').trim();
     const job = await prisma.job.findUnique({ where: { jobId: cleanJobId } });
     
     if (!job) {
