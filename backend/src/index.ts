@@ -18,7 +18,7 @@ const app = express();
  * app.options('*') handles the "Preflight" requests specifically for tunnels (Serveo/Cloudflare).
  * We explicitly allow the GitHub Pages origin and necessary bypass headers.
  */
-app.options('*', cors()); 
+app.options(/.*/, cors()); 
 app.use(cors({ 
   origin: true, 
   credentials: true,
