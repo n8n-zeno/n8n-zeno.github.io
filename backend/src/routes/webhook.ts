@@ -7,14 +7,21 @@ router.post('/n8n-result', async (req: Request, res: Response): Promise<void> =>
   try {
     const { jobId, status, rawCode, error } = req.body;
 
+    console.log(`[WEBHOOK] Received n8n-result for jobId: "${jobId}"`);
+    console.log(`[WEBHOOK] Keys in req.body:`, Object.keys(req.body));
+    console.log(`[WEBHOOK] Type of rawCode:`, typeof rawCode);
+    console.log(`[WEBHOOK] rawCode is truthy:`, !!rawCode);
+
     if (!jobId || !status) {
       res.status(400).json({ error: 'jobId and status are required' });
       return;
     }
 
-    const job = await prisma.job.findUnique({ where: { jobId: jobId } });
+    const cleanJobId = String(jobId).trim();
+    const job = await prisma.job.findUnique({ where: { jobId: cleanJobId } });
     
     if (!job) {
+      console.log(`[WEBHOOK] ❌ Job not found in DB: "${cleanJobId}"`);
       res.status(404).json({ error: 'Job not found' });
       return;
     }
